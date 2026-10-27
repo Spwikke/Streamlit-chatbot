@@ -27,6 +27,11 @@ if prompt and prompt.files:
     st.session_state.texte_pdf = texte   # permet de conserver des données entre les interactions
     document.close()
 
+if prompt and prompt.text:
+    question = prompt.text
+    st.write("Question posée :", question)
+    if not st.session_state.texte_pdf:
+        st.warning("Veuillez charger un PDF.")
 
 if st.session_state.texte_pdf:
     st.success("Un PDF à bien été chargé !")
