@@ -8,8 +8,9 @@ client = genai.Client(api_key=os.environ["GEMINI_API_KEY"])
 if "texte_pdf" not in st.session_state: 
     st.session_state.texte_pdf = ""
 
-message = st.chat_message("human", avatar="🦖")
-message.write("Welcome to my chat app 👋")
+st.title("Welcome to my chat app !", text_alignment="center")
+st.caption("Assistant spécialisé dans l'analyse de PDF", text_alignment="center")
+st.divider()
 
 prompt = st.chat_input(
     "Pose une question ou ajoute un PDF",
@@ -30,8 +31,14 @@ if prompt and prompt.files:
     st.session_state.texte_pdf = texte   # permet de conserver des données entre les interactions
     document.close()
 
+if st.session_state.texte_pdf:
+    st.success("Un PDF à bien été chargé !")
+    st.write("Nombre de caractères :", len(st.session_state.texte_pdf))
+
 if prompt and prompt.text:
     question = prompt.text
+    message = st.chat_message("user", avatar="👤")
+    message.write(question)
     if st.session_state.texte_pdf:
         instructions = f"""
         Réponds uniquement à partir du document suivant.
@@ -46,19 +53,9 @@ if prompt and prompt.text:
             model = "gemini-3.5-flash-lite",
             contents = instructions
         )
+        message = st.chat_message("assistant", avatar="🤖")
         st.write(response.text)
     else:
         st.warning("Charge d'abord un PDF.")
-
-if st.session_state.texte_pdf:
-    st.success("Un PDF à bien été chargé !")
-    st.write("Nombre de caractères :", len(st.session_state.texte_pdf))
-
-
-
-
-
-
-
 
 
