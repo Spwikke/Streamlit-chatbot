@@ -12,10 +12,16 @@ client = genai.Client(api_key=os.environ["GEMINI_API_KEY"])
 
 if "texte_pdf" not in st.session_state: 
     st.session_state.texte_pdf = ""
+if "messages" not in st.session_state:   # nous permettra de conserver les msg précédents
+    st.session_state.messages = []
 
 st.title("Welcome to my chat app !", text_alignment="center")
 st.caption("Assistant spécialisé dans l'analyse de PDF", text_alignment="center")
 st.divider()
+
+for message in st.session_state.messages:
+    message_chat = st.chat_message(message["role"])
+    message_chat.write(message["content"])
 
 prompt = st.chat_input(
     "Pose une question ou ajoute un PDF",
@@ -42,8 +48,12 @@ if st.session_state.texte_pdf:
 
 if prompt and prompt.text:
     question = prompt.text
-    message = st.chat_message("user", avatar="👤")
-    message.write(question)
+    st.session_state.messages.append({
+        "role": "user",
+        "content": question
+    })
+    message_chat = st.chat_message("user", avatar="👤")
+    message_chat.write(question)
     if st.session_state.texte_pdf:
         instructions = f"""
         Réponds uniquement à partir du document suivant.
@@ -58,9 +68,12 @@ if prompt and prompt.text:
             model = "gemini-3.5-flash-lite",
             contents = instructions
         )
-        message = st.chat_message("assistant", avatar="🤖")
-        st.write(response.text)
+        reponse = response.text
+        st.session_state.messages.append({
+            "role": "assistant",
+            "content": reponse
+        })
+        message_chat = st.chat_message("assistant", avatar="🤖")
+        message_chat.write(reponse)
     else:
         st.warning("Charge d'abord un PDF.")
-
-
