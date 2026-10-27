@@ -2,6 +2,9 @@ import streamlit as st
 import numpy as np
 import pymupdf
 
+if "texte_pdf" not in st.session_state: 
+    st.session_state.texte_pdf = ""
+
 message = st.chat_message("human", avatar="🦖")
 message.write("Welcome to my chat app 👋")
 
@@ -21,10 +24,13 @@ if prompt and prompt.files:
     texte = ""
     for page in document:
         texte += page.get_text()
+    st.session_state.texte_pdf = texte   # permet de conserver des données entre les interactions
     document.close()
-    st.write("Texte extrait du PDF :")
-    st.write(texte)
 
+
+if st.session_state.texte_pdf:
+    st.success("Un PDF à bien été chargé !")
+    st.write("Nombre de caractères :", len(st.session_state.texte_pdf))
 
 
 
