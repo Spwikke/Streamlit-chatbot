@@ -1,0 +1,7 @@
+.venv/
+__pycache__/
+*.pyc
+.env
+.streamlit/secrets.toml
+
+# évite d'envoyer ton environnement virtuel et tes clés API sur GitHub
