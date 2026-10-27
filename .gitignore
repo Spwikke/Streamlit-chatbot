@@ -4,4 +4,4 @@ __pycache__/
 .env
 .streamlit/secrets.toml
 
-# évite d'envoyer ton environnement virtuel et tes clés API sur GitHub
+# évite d'envoyer l'environnement virtuel et mes clés API sur GitHub
