@@ -3,6 +3,11 @@ import pymupdf
 import os
 from google import genai
 
+st.set_page_config(
+    page_title="PDF ChatBot",
+    page_icon="📄",
+)
+
 client = genai.Client(api_key=os.environ["GEMINI_API_KEY"])
 
 if "texte_pdf" not in st.session_state: 
