@@ -20,7 +20,11 @@ st.caption("Assistant spécialisé dans l'analyse de PDF", text_alignment="cente
 st.divider()
 
 for message in st.session_state.messages:
-    message_chat = st.chat_message(message["role"])
+    if message["role"] == "user":   # Conservation de l'avatar dans l'historique
+        avatar = "👤"
+    else:
+        avatar = "🤖"
+    message_chat = st.chat_message(message["role"], avatar=avatar)
     message_chat.write(message["content"])
 
 prompt = st.chat_input(
@@ -42,7 +46,6 @@ if prompt and prompt.files:
     st.session_state.texte_pdf = texte   # permet de conserver des données entre les interactions
     document.close()
 
-if st.session_state.texte_pdf:
     st.success("Un PDF à bien été chargé !")
     st.write("Nombre de caractères :", len(st.session_state.texte_pdf))
 
