@@ -51,10 +51,7 @@ if prompt and prompt.files:
 
 if prompt and prompt.text:
     question = prompt.text
-    st.session_state.messages.append({
-        "role": "user",
-        "content": question
-    })
+
     message_chat = st.chat_message("user", avatar="👤")
     message_chat.write(question)
     if st.session_state.texte_pdf:
@@ -67,11 +64,31 @@ if prompt and prompt.text:
         QUESTION :
         {question}
         """
+        historique = []   # on crée un historique pour gemini
+        for message in st.session_state.messages:
+            if message["role"] == "assistant":
+                role = "model"
+            else:
+                role = "user"
+            historique.append({
+                "role": role,
+                "parts": [{"text": message["content"]}]
+            })
+        historique.append({     # on ajoute la nouvelle question
+            "role": "user",
+            "parts": [{"text": instructions}]
+        })
+
         response = client.models.generate_content(
-            model = "gemini-3.5-flash-lite",
-            contents = instructions
+            model="gemini-3.5-flash-lite",
+            contents=historique
         )
+
         reponse = response.text
+        st.session_state.messages.append({
+            "role": "user",
+            "content": question
+        })
         st.session_state.messages.append({
             "role": "assistant",
             "content": reponse
