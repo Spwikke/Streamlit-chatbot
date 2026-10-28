@@ -1,0 +1,58 @@
+import pymupdf
+import os
+from google import genai
+
+client = genai.Client(api_key=os.environ["GEMINI_API_KEY"])
+
+def extraire_texte_pdf(fichier):
+    document = pymupdf.open(            # ouvre les données comme un document PDF
+        stream=fichier.getvalue(),      # récupère les données binaires du fichier envoyé à Streamlit
+        filetype="pdf"
+    )
+    texte = ""
+    for page in document:
+        texte += page.get_text()
+    document.close()
+    return texte
+
+def question_gemini(question, texte_pdf, messages):
+    instructions = f"""
+    Réponds uniquement à partir du document suivant.
+    Si la réponse n'est pas présente dans le document,
+    indique que tu ne trouves pas cette information.
+    DOCUMENT :
+    {texte_pdf}
+    QUESTION :
+    {question}
+    """
+    historique = []     # on crée un historique pour gemini
+    for message in messages:
+        if message["role"] == "assistant":
+            role = "model"
+        else:
+            role = "user"
+        historique.append({     # on ajoute la nouvelle question
+            "role": role,
+            "parts": [{"text": message["content"]}]
+        })
+    historique.append({
+        "role": "user",
+        "parts": [{"text": instructions}]
+    })
+    response = client.models.generate_content(
+        model="gemini-3.5-flash-lite",
+        contents=historique
+    )
+    return response.text
+
+
+
+
+
+
+
+
+
+
+
+
