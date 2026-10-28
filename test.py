@@ -79,12 +79,16 @@ if prompt and prompt.text:
             "parts": [{"text": instructions}]
         })
 
-        response = client.models.generate_content(
-            model="gemini-3.5-flash-lite",
-            contents=historique
-        )
+        message_chat = st.chat_message("assistant", avatar="🤖")    
+        with message_chat:
+            with st.spinner("Analyse du PDF en cours...", show_time=True):
+                response = client.models.generate_content(
+                    model="gemini-3.5-flash-lite",
+                    contents=historique
+                )
+                reponse = response.text
+            st.write(reponse)
 
-        reponse = response.text
         st.session_state.messages.append({
             "role": "user",
             "content": question
@@ -93,7 +97,5 @@ if prompt and prompt.text:
             "role": "assistant",
             "content": reponse
         })
-        message_chat = st.chat_message("assistant", avatar="🤖")
-        message_chat.write(reponse)
     else:
         st.warning("Charge d'abord un PDF.")
