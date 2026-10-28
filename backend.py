@@ -17,9 +17,9 @@ def extraire_texte_pdf(donnees_pdf):
 
 def question_gemini(question, texte_pdf, messages):
     instructions = f"""
-    Réponds uniquement à partir du document suivant.
-    Si la réponse n'est pas présente dans le document,
-    indique que tu ne trouves pas cette information.
+    Réponds en priorité à partir du document fourni.
+    Si le document ne contient pas la réponse, utilise tes connaissances générales pour répondre.
+    Précise si ta réponse provient du document ou de tes connaissances générales.
     DOCUMENT :
     {texte_pdf}
     QUESTION :

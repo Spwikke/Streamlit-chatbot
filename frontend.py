@@ -53,17 +53,19 @@ if prompt:
                 noms_fichiers = list(st.session_state.fichiers_pdf.keys())
                 nom_choisi = choisir_document(question, noms_fichiers)
             if nom_choisi is None:
-                reponse = "Aucun document correspondant à ta question."
+                texte_pdf = ""
+                st.info("Aucun PDF pertinent, réponse avec les connaissances de Gemini.")
             else:
                 st.write("PDF sélectionné :", nom_choisi)
-                texte_pdf = extraire_texte_pdf(st.session_state.fichiers_pdf[nom_choisi])
+                texte_pdf = extraire_texte_pdf(
+                    st.session_state.fichiers_pdf[nom_choisi]
+                )
+                st.success("Le PDF sélectionné a bien été analysé !")
                 st.write("Nombre de caractères :", len(texte_pdf))
-                with st.spinner("Analyse du PDF en cours...", show_time=True):
-                    reponse = question_gemini(
-                        question,
-                        texte_pdf,
-                        st.session_state.messages
-                    )
+            with st.spinner("Génération de la réponse...", show_time=True):
+                reponse = question_gemini(
+                    question, texte_pdf, st.session_state.messages
+                )
             st.write(reponse)
         st.session_state.messages.append({
             "role": "user",
@@ -74,4 +76,10 @@ if prompt:
             "content": reponse
         })
     else:
-        st.warning("Charge d'abord un PDF.")
+        with st.spinner("Génération de la réponse...", show_time=True):
+            reponse = question_gemini(
+            question, "", st.session_state.messages
+        )
+    st.chat_message("assistant", avatar="🤖").write(reponse)
+    st.session_state.messages.append({"role": "user", "content": question})
+    st.session_state.messages.append({"role": "assistant", "content": reponse})
