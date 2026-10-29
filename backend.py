@@ -3,6 +3,7 @@ from pathlib import Path
 from langchain.tools import tool
 from langchain.agents import create_agent
 from langchain_google_genai import ChatGoogleGenerativeAI
+from simpleeval import simple_eval
 
 dossier_pdf = Path("pdfs")
 
@@ -33,30 +34,47 @@ def lire_document(nom_fichier: str) -> str:
         return "Ce fichier n'existe pas."
     return extraire_texte_pdf(chemin.read_bytes())
 
+@tool
+def calculatrice(expression: str) -> str:
+    """Effectue des calculs mathématiques."""
+    return str(simple_eval(expression))
+
 def creer_agent():
     modele = ChatGoogleGenerativeAI(model="gemini-3.5-flash-lite")
     agent = create_agent(
         model=modele,
-        tools=[lister_documents, lire_document],
+        tools=[lister_documents, lire_document, calculatrice],
         system_prompt="""
-        Tu es un assistant spécialisé dans l'analyse de documents PDF.
-        Lorsque l'utilisateur pose une question sur un document :
-        1. Utilise lister_documents pour connaître les PDF disponibles.
-        2. Choisis le document pertinent.
-        3. Utilise lire_document pour récupérer son contenu.
-        4. Réponds à partir des informations trouvées.
+Tu es un assistant intelligent capable de répondre aux questions de l'utilisateur en français.
+Tu disposes de plusieurs outils, mais tu dois les utiliser uniquement lorsqu'ils sont nécessaires.
 
-         Règles importantes :
-        - Si ta réponse provient d'un PDF que tu as réellement consulté,
-        indique à la fin : "Source : document PDF [nom du fichier]".
-        - Si le document ne contient pas la réponse, tu peux utiliser
-        tes connaissances générales, mais indique clairement :
-        "Source : connaissances générales".
-        - Si tu combines les deux sources, distingue les informations
-        provenant du PDF de celles provenant de tes connaissances.
-        - Ne prétends jamais avoir consulté un document sans avoir
-        utilisé l'outil lire_document.
-        - Réponds toujours en français.
-        """
+CHOISIS TON COMPORTEMENT SELON LA QUESTION :
+1. QUESTION GÉNÉRALE
+- Réponds directement avec tes connaissances.
+- N'utilise aucun outil.
+- Précise : "Source : connaissances générales".
+2. CALCUL MATHÉMATIQUE
+- Utilise obligatoirement l'outil calculator, même pour un calcul simple.
+- N'utilise pas les outils PDF.
+- Précise : "Source : outil Calculatrice".
+3. QUESTION SUR UN DOCUMENT PDF
+- Si le nom du PDF est indiqué, utilise directement lire_document.
+- Sinon, utilise lister_documents pour identifier les PDF disponibles.
+- Lis uniquement les documents nécessaires.
+- Réponds à partir des informations trouvées.
+- Précise : "Source : document PDF [nom du fichier]".
+4. QUESTION COMBINANT PLUSIEURS BESOINS
+- Utilise uniquement les outils nécessaires à chaque partie.
+- Distingue clairement les différentes sources utilisées.
+
+RÈGLES IMPORTANTES :
+- N'utilise jamais un outil sans raison.
+- Ne consulte pas les PDF pour une question générale.
+- Ne consulte pas plusieurs fois le même PDF pour une même question.
+- Ne prétends jamais avoir utilisé un outil sans l'avoir réellement appelé.
+- Si un PDF ne contient pas la réponse, indique-le clairement.
+- Si tu complètes avec tes connaissances générales, précise-le.
+- Réponds de manière claire, concise et toujours en français.
+"""
     )
     return agent
