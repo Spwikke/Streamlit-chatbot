@@ -1,3 +1,5 @@
 streamlit
-google-genai
-pymupdf
+PyMuPDF
+langchain
+langchain-google-genai
+simpleeval
