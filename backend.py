@@ -1,47 +1,47 @@
-import pymupdf
-from pathlib import Path
-from langchain.tools import tool
-from langchain.agents import create_agent
-from langchain_google_genai import ChatGoogleGenerativeAI
-from simpleeval import simple_eval
+import pymupdf      # ouvrir et de lire des documents PDF
+from pathlib import Path       # manipuler les chemins et les fichiers
+from langchain.tools import tool    # transformer une fonction Python en outil utilisable par un agent
+from langchain.agents import create_agent   # créer un agent IA
+from langchain_google_genai import ChatGoogleGenerativeAI   # pour utiliser le modèle Gemini de Google avec LangChain
+from simpleeval import simple_eval  # évaluer des expressions mathématiques
 
-dossier_pdf = Path("pdfs")
+dossier_pdf = Path("pdfs")  # chemin du dossier dans lequel sont enregistrés les documents PDF
 
 def extraire_texte_pdf(donnees_pdf):
     document = pymupdf.open(            # ouvre les données comme un document PDF
         stream=donnees_pdf,
         filetype="pdf"
     )
-    texte = ""
-    for page in document:
+    texte = ""          # chaine pour stocker le texte
+    for page in document:       # on récup le texte de chaque page
         texte += page.get_text()
-    document.close()
+    document.close()        # on ferme le document
     return texte
 
 @tool
 def lister_documents() -> str:
     """Liste les noms des documents PDF disponibles."""
-    fichiers = list(dossier_pdf.glob("*.pdf"))
+    fichiers = list(dossier_pdf.glob("*.pdf"))  # récupère tous les fichiers .pdf dans le dossier
     if not fichiers:
         return "Aucun document disponible."
-    return str([fichier.name for fichier in fichiers])
+    return str([fichier.name for fichier in fichiers])  # renvoie la liste des noms de fichiers
 
 @tool
 def lire_document(nom_fichier: str) -> str:
     """Lit le contenu d'un PDF à partir de son nom."""
-    chemin = dossier_pdf / Path(nom_fichier).name
+    chemin = dossier_pdf / Path(nom_fichier).name   # assemble les deux chemins pour construire le chemin demandé
     if not chemin.is_file() or chemin.suffix.lower() != ".pdf":
         return "Ce fichier n'existe pas."
-    return extraire_texte_pdf(chemin.read_bytes())
+    return extraire_texte_pdf(chemin.read_bytes())  # lit les données du PDF, extrait son texte et le renvoie
 
 @tool
 def calculatrice(expression: str) -> str:
     """Effectue des calculs mathématiques."""
-    return str(simple_eval(expression))
+    return str(simple_eval(expression))    # convertit le résultat en texte
 
 def creer_agent():
-    modele = ChatGoogleGenerativeAI(model="gemini-3.5-flash-lite")
-    agent = create_agent(
+    modele = ChatGoogleGenerativeAI(model="gemini-3.5-flash-lite")  # initialise le modele utilisé par l'agent
+    agent = create_agent(   
         model=modele,
         tools=[lister_documents, lire_document, calculatrice],
         system_prompt="""
