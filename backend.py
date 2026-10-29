@@ -54,7 +54,7 @@ CHOISIS TON COMPORTEMENT SELON LA QUESTION :
 - N'utilise aucun outil.
 - Précise : "Source : connaissances générales".
 2. CALCUL MATHÉMATIQUE
-- Utilise obligatoirement l'outil calculator, même pour un calcul simple.
+- Utilise obligatoirement l'outil calculatrice, même pour un calcul simple.
 - N'utilise pas les outils PDF.
 - Précise : "Source : outil Calculatrice".
 3. QUESTION SUR UN DOCUMENT PDF
