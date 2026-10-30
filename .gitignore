@@ -4,5 +4,6 @@ __pycache__/
 .env
 .streamlit/secrets.toml
 pdfs/
+chroma_db/
 
 # évite d'envoyer l'environnement virtuel et mes clés API sur GitHub

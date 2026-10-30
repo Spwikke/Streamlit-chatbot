@@ -3,3 +3,5 @@ PyMuPDF
 langchain
 langchain-google-genai
 simpleeval
+langchain-text-splitters
+langchain-chroma

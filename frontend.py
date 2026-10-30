@@ -1,5 +1,5 @@
 import streamlit as st  # pour créer l'interface web 
-from backend import creer_agent
+from backend import creer_agent, indexation
 from pathlib import Path    # manipuler les chemins et les fichiers
 
 st.set_page_config(
@@ -9,6 +9,8 @@ st.set_page_config(
 
 if "messages" not in st.session_state:   # nous permettra de conserver les msg précédents
     st.session_state.messages = []       # session_state permet de conserver les données entre les intéractions
+if "fichiers_indexes" not in st.session_state:
+    st.session_state.fichiers_indexes = []  # mémoriser les fichiers indexés pendant la session
 
 with st.sidebar:
     st.title("Mes documents")
@@ -22,11 +24,17 @@ with st.sidebar:
     if fichiers:
         for fichier in fichiers:
             chemin = dossier_pdf / Path(fichier.name).name  # pour chaque fichier importé, on construit le chemin du PDF dans le dossier pdfs
-            chemin.write_bytes(fichier.getvalue())  # enregistre le contenu du PDF sur le disque dur
-        st.divider()
-    st.subheader("Documents chargés")
-    for chemin in dossier_pdf.glob("*.pdf"):    # parcourt tous les PDF du dossier pdfs
-        st.write("📄", chemin.name)
+            if fichier.name not in st.session_state.fichiers_indexes:   # vérifie si le fichier a déjà été indexé pendant la session
+                chemin.write_bytes(fichier.getvalue())  # enregistre le contenu du PDF sur le disque dur
+                with st.spinner(f"Indexation de {fichier.name}..."):
+                    try:
+                        nombre_chunks = indexation(chemin)  # on lance l'indexation du PDF dans Chroma
+                        st.session_state.fichiers_indexes.append(fichier.name)  
+                        st.success(
+                            f"{fichier.name} : {nombre_chunks} chunks indexés"  # nb de chunks enregistrés
+                        )
+                    except Exception as erreur:
+                        st.error(f"Erreur : {erreur}")
 
 st.title("Welcome to my chat app !", text_alignment="center")
 st.caption("Assistant spécialisé dans l'analyse de PDF", text_alignment="center")
